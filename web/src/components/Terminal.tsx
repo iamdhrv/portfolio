@@ -8,14 +8,13 @@ type HistoryItem = {
   output: ReactNode;
 };
 
-// Colored ASCII art for the portrait
 const asciiPortrait = (
   <span className="font-mono text-xs md:text-sm leading-tight">
     <span className="text-blue-400">@</span><span className="text-blue-400">#</span><span className="text-blue-400">@</span><span className="text-blue-400">#</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">#</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">@</span><span className="text-blue-400">#</span><br/>
     <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-zinc-200">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-200">#</span><span className="text-blue-400">@</span><br/>
-    <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-zinc-100">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">#</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
-    <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
-    <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
+    <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-zinc-100">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">#</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
+    <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
+    <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
     <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-400">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
     <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-400">@</span><span className="text-zinc-500">#</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-400">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
     <span className="text-blue-400">@</span><span className="text-zinc-100">#</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-400">#</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-500">@</span><span className="text-zinc-400">#</span><span className="text-zinc-400">@</span><span className="text-zinc-300">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-white">@</span><span className="text-zinc-300">@</span><span className="text-zinc-100">@</span><span className="text-blue-400">@</span><br/>
@@ -32,20 +31,25 @@ export default function Terminal() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [showMatrix, setShowMatrix] = useState(false);
-  const [matrixChars, setMatrixChars] = useState<string[]>([]);
+  const [matrixChars, setMatrixChars] = useState<string[][]>([]);
   const [guestbook, setGuestbook] = useState<{name: string; message: string; time: string}[]>([
     { name: "Alice", message: "Cool portfolio! 🤘", time: "2024-01-15" },
     { name: "Bob", message: "Love the retro vibe", time: "2024-01-16" },
   ]);
   const [dvdPosition, setDvdPosition] = useState({ x: 0, y: 0 });
-  const [dvdColor, setDvdColor] = useState(0);
-  const dvdColors = ["red", "blue", "green", "yellow", "magenta", "cyan"];
+  const [dvdColorIndex, setDvdColorIndex] = useState(0);
+  const [showDvd, setShowDvd] = useState(false);
+  const [idleTime, setIdleTime] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   
+  const dvdColors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff", "#ff6600", "#6600ff"];
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const songs = [
     { title: "Tu Jaane Na", artist: "Atif Aslam", year: 2009, duration: "5:37", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
@@ -68,6 +72,7 @@ export default function Terminal() {
   };
   const colors = getThemeColors();
 
+  // Initial boot
   useEffect(() => {
     setHistory([{ id: "boot", command: "", output: (
       <div className="mb-4">
@@ -78,26 +83,50 @@ export default function Terminal() {
     )}]);
   }, []);
 
+  // Focus management
   useEffect(() => {
-    const handleClick = () => inputRef.current?.focus();
+    const handleClick = () => {
+      inputRef.current?.focus();
+      setIdleTime(0);
+    };
     document.addEventListener("click", handleClick);
-    return () => { document.removeEventListener("click", handleClick); stopProgressTracking(); };
+    return () => document.removeEventListener("click", handleClick);
   }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [history]);
 
-  // DVD Bounce
+  // Idle timer for DVD screensaver
   useEffect(() => {
-    if (!isPlaying) return;
-    let x = 0, y = 0, dx = 1, dy = 1, maxX = 30, maxY = 8;
+    idleTimerRef.current = setInterval(() => {
+      setIdleTime(t => t + 1);
+      // Show DVD after 10 seconds of idle
+      if (idleTime >= 10 && !showDvd && !showMatrix) {
+        setShowDvd(true);
+      }
+    }, 1000);
+    return () => { if (idleTimerRef.current) clearInterval(idleTimerRef.current); };
+  }, [idleTime, showDvd, showMatrix]);
+
+  // DVD Bounce Animation
+  useEffect(() => {
+    if (!showDvd) return;
+    let x = 0, y = 0, dx = 1, dy = 1, maxX = 28, maxY = 12;
     const interval = setInterval(() => {
       x += dx; y += dy;
-      if (x >= maxX || x <= 0) { dx = -dx; setDvdColor(p => (p + 1) % dvdColors.length); }
-      if (y >= maxY || y <= 0) { dy = -dy; setDvdColor(p => (p + 1) % dvdColors.length); }
+      if (x >= maxX || x <= 0) { dx = -dx; setDvdColorIndex(ci => (ci + 1) % dvdColors.length); }
+      if (y >= maxY || y <= 0) { dy = -dy; setDvdColorIndex(ci => (ci + 1) % dvdColors.length); }
       setDvdPosition({ x, y });
-    }, 100);
+    }, 80);
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [showDvd]);
+
+  // Reset idle on input
+  useEffect(() => {
+    if (input.length > 0) {
+      setIdleTime(0);
+      setShowDvd(false);
+    }
+  }, [input]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -108,48 +137,86 @@ export default function Terminal() {
   const playSong = (index: number) => {
     if (audioRef.current) {
       audioRef.current.src = songs[index].src;
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {});
       setIsPlaying(true);
       setCurrentSongIndex(index);
       setProgress(0);
-      startProgressTracking();
+      setCurrentTime(0);
     }
   };
 
   const togglePlayPause = () => {
     if (audioRef.current) {
-      if (isPlaying) { audioRef.current.pause(); stopProgressTracking(); }
-      else { audioRef.current.src ? audioRef.current.play() : playSong(0); startProgressTracking(); }
-      setIsPlaying(!isPlaying);
+      if (isPlaying) { 
+        audioRef.current.pause(); 
+        setIsPlaying(false);
+      } else {
+        if (!audioRef.current.src) {
+          playSong(0);
+        } else {
+          audioRef.current.play().catch(() => {});
+          setIsPlaying(true);
+        }
+      }
     }
   };
 
   const nextSong = () => playSong((currentSongIndex + 1) % songs.length);
   const prevSong = () => playSong((currentSongIndex - 1 + songs.length) % songs.length);
 
-  const startProgressTracking = () => {
-    stopProgressTracking();
-    progressIntervalRef.current = setInterval(() => {
-      if (audioRef.current?.duration) {
-        const p = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-        setProgress(p);
-        if (p >= 99) nextSong();
-      }
-    }, 1000);
+  const handleAudioTimeUpdate = () => {
+    if (audioRef.current) {
+      const curr = audioRef.current.currentTime;
+      const dur = audioRef.current.duration || 1;
+      setCurrentTime(curr);
+      setDuration(dur);
+      setProgress((curr / dur) * 100);
+    }
   };
 
-  const stopProgressTracking = () => {
-    if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
+  const handleAudioEnded = () => {
+    nextSong();
   };
 
+  // Matrix Rain Effect - Full screen vertical rain
   const startMatrixRain = () => {
+    setShowDvd(false);
     setShowMatrix(true);
-    const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789";
-    const interval = setInterval(() => setMatrixChars(Array(50).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)])));
-    setTimeout(() => { clearInterval(interval); setShowMatrix(false); setMatrixChars([]); }, 5000);
+    // Initialize matrix with random characters
+    const cols = 50;
+    const rows = 20;
+    const initialChars: string[][] = [];
+    for (let r = 0; r < rows; r++) {
+      const row: string[] = [];
+      for (let c = 0; c < cols; c++) {
+        row.push(String.fromCharCode(0x30A0 + Math.random() * 96));
+      }
+      initialChars.push(row);
+    }
+    setMatrixChars(initialChars);
+    
+    // Update characters periodically
+    const interval = setInterval(() => {
+      setMatrixChars(prev => {
+        const newChars = prev.map(row => 
+          row.map(() => Math.random() > 0.7 ? String.fromCharCode(0x30A0 + Math.random() * 96) : '')
+        );
+        return newChars;
+      });
+    }, 100);
+    
+    setTimeout(() => {
+      clearInterval(interval);
+      setShowMatrix(false);
+      setMatrixChars([]);
+    }, 5000);
   };
 
   const handleCommand = (cmd: string) => {
+    setShowDvd(false);
+    setShowMatrix(false);
+    setIdleTime(0);
+    
     const trimmedCmd = cmd.trim();
     let output: ReactNode = null;
     if (trimmedCmd === "") { addHistory(trimmedCmd, null); return; }
@@ -170,7 +237,7 @@ export default function Terminal() {
             <div className="flex"><span className="w-24">guestbook</span><span className="text-zinc-500">Sign/view guestbook</span></div>
             <div className="flex"><span className="w-24">matrix</span><span className="text-zinc-500">Enter the Matrix</span></div>
             <div className="flex"><span className="w-24">snake</span><span className="text-zinc-500">Snake game</span></div>
-            <div className="flex"><span className="w-24">dvd</span><span className="text-zinc-500">DVD bounce</span></div>
+            <div className="flex"><span className="w-24">dvd</span><span className="text-zinc-500">DVD bounce screensaver</span></div>
             <div className="flex"><span className="w-24">fortune</span><span className="text-zinc-500">Fortune cookie</span></div>
             <div className="flex"><span className="w-24">sysinfo</span><span className="text-zinc-500">System info</span></div>
             <div className="flex"><span className="w-24">theme</span><span className="text-zinc-500">[minimal|matrix|ocean]</span></div>
@@ -204,11 +271,18 @@ export default function Terminal() {
               <p className="text-cyan-400 font-semibold">♫ {songs[currentSongIndex].title}</p>
               <p className="text-zinc-400 text-sm">{songs[currentSongIndex].artist} ({songs[currentSongIndex].year})</p>
               <div className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
-                <span>{formatTime((progress / 100) * (audioRef.current?.duration || 0))}</span>
-                <div className="flex-1 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+                <span>{formatTime(currentTime)}</span>
+                <div className="flex-1 h-2 bg-zinc-700 rounded-full overflow-hidden cursor-pointer" 
+                     onClick={(e) => {
+                       if (audioRef.current) {
+                         const rect = e.currentTarget.getBoundingClientRect();
+                         const percent = (e.clientX - rect.left) / rect.width;
+                         audioRef.current.currentTime = percent * duration;
+                       }
+                     }}>
                   <div className="h-full bg-cyan-500 transition-all" style={{ width: `${progress}%` }} />
                 </div>
-                <span>{songs[currentSongIndex].duration}</span>
+                <span>{formatTime(duration)}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 mb-3">
@@ -216,7 +290,7 @@ export default function Terminal() {
               <button onClick={togglePlayPause} className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm font-medium">{isPlaying ? "⏸ Pause" : "▶ Play"}</button>
               <button onClick={nextSong} className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-sm">Next ⏭</button>
             </div>
-            <p className="text-zinc-400 text-sm mb-2">Playlist:</p>
+            <p className="text-zinc-400 text-sm mb-2">Playlist (click to play):</p>
             <div className="space-y-1 max-h-32 overflow-y-auto">
               {songs.map((song, i) => (
                 <div key={i} onClick={() => playSong(i)} className={`cursor-pointer px-2 py-1 rounded text-sm flex justify-between ${i === currentSongIndex ? "bg-cyan-900/30 text-cyan-300" : "text-zinc-400 hover:bg-zinc-800"}`}>
@@ -224,7 +298,7 @@ export default function Terminal() {
                 </div>
               ))}
             </div>
-            <audio ref={audioRef} src={songs[currentSongIndex].src} onEnded={nextSong} />
+            <audio ref={audioRef} src={songs[currentSongIndex].src} onTimeUpdate={handleAudioTimeUpdate} onEnded={handleAudioEnded} onLoadedMetadata={handleAudioTimeUpdate} />
           </div>
         );
         break;
@@ -279,14 +353,8 @@ export default function Terminal() {
         );
         break;
       case "dvd":
-        output = (
-          <div className="mt-1 mb-2">
-            <p className="text-zinc-400 mb-2">💿 DVD Bounce</p>
-            <div className="bg-zinc-900 p-2 rounded font-mono text-xs inline-block relative" style={{ width: 200, height: 100 }}>
-              <span className="absolute transition-all" style={{ color: dvdColors[dvdColor], left: dvdPosition.x * 6, top: dvdPosition.y * 10, textShadow: `0 0 5px ${dvdColors[dvdColor]}` }}>DVD</span>
-            </div>
-          </div>
-        );
+        setShowDvd(true);
+        output = <div className="mt-1 mb-2 text-zinc-400">Activating DVD screensaver... (will show after 10s idle)</div>;
         break;
       case "fortune":
         const fortunes = ["A thrilling time is in your immediate future.", "Your creativity will lead you to success.", "An unexpected event will bring you fortune.", "Rest is the sweet sauce of labor.", "A beautiful, smart, and loving person will be coming into your life.", "The fortune you seek is in another cookie.", "Do not be afraid of competition.", "Adventure is worthwhile in itself."];
@@ -335,14 +403,43 @@ export default function Terminal() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto font-mono text-sm md:text-base">
+    <div className="w-full max-w-3xl mx-auto font-mono text-sm md:text-base relative">
+      {/* Matrix Effect - Full screen */}
       {showMatrix && (
-        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center overflow-hidden">
-          <div className="text-green-500 font-mono text-xl leading-relaxed">
-            {matrixChars.map((c, i) => <span key={i} className="animate-pulse" style={{ opacity: Math.random() * 0.8 + 0.2 }}>{c}</span>)}
+        <div className="fixed inset-0 bg-black z-50 overflow-hidden">
+          <div className="absolute inset-0 flex flex-wrap items-start content-start p-2 gap-0">
+            {matrixChars.map((row, ri) => (
+              <div key={ri} className="flex">
+                {row.map((char, ci) => (
+                  <span key={ci} className="text-green-500 text-xs md:text-sm font-mono" 
+                        style={{ opacity: Math.random() * 0.8 + 0.2, textShadow: '0 0 5px #00ff00' }}>
+                    {char}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+          <p className="absolute bottom-4 left-4 text-green-400 z-50">Follow the white rabbit... 🐇</p>
+        </div>
+      )}
+
+      {/* DVD Screensaver */}
+      {showDvd && (
+        <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center overflow-hidden bg-black/20">
+          <div 
+            className="absolute text-2xl md:text-4xl font-bold transition-all duration-75"
+            style={{ 
+              color: dvdColors[dvdColorIndex],
+              textShadow: `0 0 20px ${dvdColors[dvdColorIndex]}, 0 0 40px ${dvdColors[dvdColorIndex]}`,
+              left: `${dvdPosition.x * 3}%`,
+              top: `${dvdPosition.y * 6}%`,
+            }}
+          >
+            DVD
           </div>
         </div>
       )}
+
       {history.map(item => (
         <div key={item.id} className="mb-1">
           {item.command && <div className="flex items-center space-x-2"><span className={colors.prompt}>~/portfolio</span><span className={colors.symbol}>$</span><span className="text-zinc-200">{item.command}</span></div>}
@@ -352,7 +449,7 @@ export default function Terminal() {
       <div className="flex items-center space-x-2 mt-2">
         <span className={colors.prompt}>~/portfolio</span>
         <span className={colors.symbol}>$</span>
-        <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} className="flex-1 bg-transparent border-none outline-none text-zinc-200" autoFocus spellCheck={false} autoComplete="off" />
+        <input ref={inputRef} type="text" value={input} onChange={e => { setInput(e.target.value); setIdleTime(0); setShowDvd(false); }} onKeyDown={handleKeyDown} className="flex-1 bg-transparent border-none outline-none text-zinc-200" autoFocus spellCheck={false} autoComplete="off" />
       </div>
       <div ref={bottomRef} className="h-4" />
     </div>

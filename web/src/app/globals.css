@@ -12,3 +12,8 @@ body {
   background: #3f3f46; /* zinc-700 */
   color: #f4f4f5;
 }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

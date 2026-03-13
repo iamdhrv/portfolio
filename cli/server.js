@@ -1,6 +1,7 @@
 const { Server } = require('ssh2');
 const fs = require('fs');
 const crypto = require('crypto');
+const path = require('path');
 
 // Generate temporary RSA key for the server in PEM format
 const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
@@ -11,7 +12,7 @@ const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
 
 let asciiArt = '';
 try {
-  asciiArt = fs.readFileSync('/root/.openclaw/workspace/ascii-portrait.txt', 'utf8');
+  asciiArt = fs.readFileSync(path.join(__dirname, 'ascii-art7.txt'), 'utf8');
 } catch (e) {
   asciiArt = 'ASCII Art not found.';
 }

@@ -101,10 +101,8 @@ export default function Terminal() {
   const [duration, setDuration] = useState(0);
   const [showMatrix, setShowMatrix] = useState(false);
   const [matrixChars, setMatrixChars] = useState<string[][]>([]);
-  const [guestbook, setGuestbook] = useState<{name: string; message: string; time: string}[]>([
-    { name: "Alice", message: "Cool portfolio! 🤘", time: "2024-01-15" },
-    { name: "Bob", message: "Love the retro vibe", time: "2024-01-16" },
-  ]);
+  const [guestbook, setGuestbook] = useState<{name: string; message: string; time: string}[]>([]);
+  const [guestbookLoading, setGuestbookLoading] = useState(true);
   const [dvdPosition, setDvdPosition] = useState({ x: 0, y: 0 });
   const [dvdColorIndex, setDvdColorIndex] = useState(0);
   const [showDvd, setShowDvd] = useState(false);
@@ -148,6 +146,15 @@ export default function Terminal() {
   };
   const colors = getThemeColors();
 
+  // Fetch guestbook from API
+  useEffect(() => {
+    fetch('/api/guestbook')
+      .then(res => res.json())
+      .then(data => setGuestbook(data))
+      .catch(() => {})
+      .finally(() => setGuestbookLoading(false));
+  }, []);
+
   // Initial boot
   useEffect(() => {
     setHistory([{ id: "boot", command: "", output: (
@@ -175,24 +182,24 @@ export default function Terminal() {
   useEffect(() => {
     idleTimerRef.current = setInterval(() => {
       setIdleTime(t => t + 1);
-      // Show DVD after 10 seconds of idle
-      if (idleTime >= 10 && !showDvd && !showMatrix) {
+      // Show DVD after 10 seconds of idle (but not while playing music)
+      if (idleTime >= 10 && !showDvd && !showMatrix && !isPlaying) {
         setShowDvd(true);
       }
     }, 1000);
     return () => { if (idleTimerRef.current) clearInterval(idleTimerRef.current); };
-  }, [idleTime, showDvd, showMatrix]);
+  }, [idleTime, showDvd, showMatrix, isPlaying]);
 
-  // DVD Bounce Animation
+  // DVD Bounce Animation - Full screen
   useEffect(() => {
     if (!showDvd) return;
-    let x = 0, y = 0, dx = 1, dy = 1, maxX = 28, maxY = 12;
+    let x = 5, y = 10, dx = 0.4, dy = 0.25;
     const interval = setInterval(() => {
       x += dx; y += dy;
-      if (x >= maxX || x <= 0) { dx = -dx; setDvdColorIndex(ci => (ci + 1) % dvdColors.length); }
-      if (y >= maxY || y <= 0) { dy = -dy; setDvdColorIndex(ci => (ci + 1) % dvdColors.length); }
+      if (x >= 90 || x <= 2) { dx = -dx; setDvdColorIndex(ci => (ci + 1) % dvdColors.length); }
+      if (y >= 85 || y <= 5) { dy = -dy; setDvdColorIndex(ci => (ci + 1) % dvdColors.length); }
       setDvdPosition({ x, y });
-    }, 80);
+    }, 16);
     return () => clearInterval(interval);
   }, [showDvd]);
 
@@ -523,18 +530,40 @@ export default function Terminal() {
       case "guestbook":
         const gbArgs = args.slice(1);
         if (gbArgs[0] === "sign" && gbArgs.length >= 2) {
-          setGuestbook([...guestbook, { name: "Guest", message: gbArgs.slice(1).join(" "), time: new Date().toISOString().split("T")[0] }]);
-          output = <div className="mt-1 mb-2 text-green-400">✓ Thanks for signing!</div>;
+          const message = gbArgs.slice(1).join(" ");
+          fetch('/api/guestbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                setGuestbook(prev => [...prev, data.entry]);
+                addHistory(trimmedCmd, <div className="mt-1 mb-2 text-green-400">✓ Thanks for signing!</div>);
+                return;
+              }
+            })
+            .catch(() => {});
+          output = <div className="mt-1 mb-2 text-zinc-400">Signing guestbook...</div>;
         } else {
-          output = (
-            <div className="mt-1 mb-2">
-              <p className="text-zinc-400 mb-2">📖 Guestbook ({guestbook.length} entries)</p>
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {guestbook.map((e, i) => <div key={i} className="bg-zinc-800/30 p-2 rounded border-l-2 border-cyan-500"><p className="text-zinc-300 text-sm">"{e.message}"</p><p className="text-zinc-500 text-xs mt-1">— {e.name} • {e.time}</p></div>)}
+          if (guestbookLoading) {
+            output = <div className="mt-1 mb-2 text-zinc-400">Loading guestbook...</div>;
+          } else {
+            output = (
+              <div className="mt-1 mb-2">
+                <p className="text-zinc-400 mb-2">📖 Guestbook ({guestbook.length} entries)</p>
+                {guestbook.length === 0 ? (
+                  <p className="text-zinc-500 text-sm">No entries yet. Be the first to sign!</p>
+                ) : (
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {[...guestbook].reverse().map((e, i) => <div key={i} className="bg-zinc-800/30 p-2 rounded border-l-2 border-cyan-500"><p className="text-zinc-300 text-sm">"{e.message}"</p><p className="text-zinc-500 text-xs mt-1">— {e.name} • {e.time}</p></div>)}
+                  </div>
+                )}
+                <p className="text-zinc-500 text-sm mt-2">Type 'guestbook sign &lt;message&gt;' to add</p>
               </div>
-              <p className="text-zinc-500 text-sm mt-2">Type 'guestbook sign &lt;message&gt;' to add</p>
-            </div>
-          );
+            );
+          }
         }
         break;
       case "snake":
@@ -543,7 +572,7 @@ export default function Terminal() {
         break;
       case "dvd":
         setShowDvd(true);
-        output = <div className="mt-1 mb-2 text-zinc-400">Activating DVD screensaver... (will show after 10s idle)</div>;
+        output = <div className="mt-1 mb-2 text-zinc-400">Activating DVD screensaver... (fullscreen)</div>;
         break;
       case "fortune":
         const fortunes = ["A thrilling time is in your immediate future.", "Your creativity will lead you to success.", "An unexpected event will bring you fortune.", "Rest is the sweet sauce of labor.", "A beautiful, smart, and loving person will be coming into your life.", "The fortune you seek is in another cookie.", "Do not be afraid of competition.", "Adventure is worthwhile in itself."];
@@ -612,16 +641,17 @@ export default function Terminal() {
         </div>
       )}
 
-      {/* DVD Screensaver */}
+      {/* DVD Screensaver - Full Screen */}
       {showDvd && (
-        <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center overflow-hidden bg-black/20">
+        <div className="fixed inset-0 z-40 overflow-hidden bg-black">
           <div 
-            className="absolute text-2xl md:text-4xl font-bold transition-all duration-75"
+            className="absolute text-4xl md:text-7xl font-bold"
             style={{ 
               color: dvdColors[dvdColorIndex],
-              textShadow: `0 0 20px ${dvdColors[dvdColorIndex]}, 0 0 40px ${dvdColors[dvdColorIndex]}`,
-              left: `${dvdPosition.x * 3}%`,
-              top: `${dvdPosition.y * 6}%`,
+              textShadow: `0 0 30px ${dvdColors[dvdColorIndex]}, 0 0 60px ${dvdColors[dvdColorIndex]}, 0 0 90px ${dvdColors[dvdColorIndex]}`,
+              left: `${dvdPosition.x}%`,
+              top: `${dvdPosition.y}%`,
+              transition: 'left 0.016s linear, top 0.016s linear',
             }}
           >
             DVD

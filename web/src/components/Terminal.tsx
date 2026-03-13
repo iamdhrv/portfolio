@@ -202,26 +202,31 @@ export default function Terminal() {
 
   // Snake game keyboard handler
   useEffect(() => {
-    if (!snakeGame?.active || snakeGame.gameOver) return;
+    if (!snakeGame?.active) return;
     
     const handleSnakeKey = (e: KeyboardEvent) => {
-      setSnakeGame(prev => {
-        if (!prev) return prev;
-        const key = e.key;
-        let newDir = prev.direction;
-        
-        if (key === "ArrowUp" && prev.direction.y !== 1) newDir = { x: 0, y: -1 };
-        else if (key === "ArrowDown" && prev.direction.y !== -1) newDir = { x: 0, y: 1 };
-        else if (key === "ArrowLeft" && prev.direction.x !== 1) newDir = { x: -1, y: 0 };
-        else if (key === "ArrowRight" && prev.direction.x !== -1) newDir = { x: 1, y: 0 };
-        
-        return { ...prev, direction: newDir };
-      });
+      // Close game on ESC
+      if (e.key === "Escape") {
+        setSnakeGame(null);
+        return;
+      }
+      
+      if (snakeGame.gameOver) return;
+      
+      const key = e.key;
+      let newDir = snakeGame.direction;
+      
+      if (key === "ArrowUp" && snakeGame.direction.y !== 1) newDir = { x: 0, y: -1 };
+      else if (key === "ArrowDown" && snakeGame.direction.y !== -1) newDir = { x: 0, y: 1 };
+      else if (key === "ArrowLeft" && snakeGame.direction.x !== 1) newDir = { x: -1, y: 0 };
+      else if (key === "ArrowRight" && snakeGame.direction.x !== -1) newDir = { x: 1, y: 0 };
+      
+      setSnakeGame(prev => prev ? { ...prev, direction: newDir } : prev);
     };
     
     window.addEventListener("keydown", handleSnakeKey);
     return () => window.removeEventListener("keydown", handleSnakeKey);
-  }, [snakeGame?.active, snakeGame?.gameOver]);
+  }, [snakeGame?.active, snakeGame?.gameOver, snakeGame?.direction]);
 
   // Snake game loop
   useEffect(() => {
@@ -573,13 +578,16 @@ export default function Terminal() {
       
       {/* Snake Game Overlay */}
       {snakeGame?.active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-green-400 font-bold">🐍 SNAKE</span>
-              <span className="text-zinc-300">Score: {snakeGame.score}</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+          <div className="bg-zinc-950 p-4 rounded-none border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]" style={{ minWidth: 400 }}>
+            {/* Header */}
+            <div className="flex justify-between items-center mb-3 border-b border-green-500/30 pb-2">
+              <span className="text-green-400 font-bold text-lg">🐍 SNAKE</span>
+              <span className="text-green-300 font-mono">SCORE: {snakeGame.score}</span>
             </div>
-            <div className="bg-black p-2 rounded font-mono text-xs leading-tight">
+            
+            {/* Game Board */}
+            <div className="bg-black p-1 font-mono text-xs leading-none border border-green-500/50">
               {(() => {
                 const grid: string[][] = [];
                 for (let y = 0; y < 15; y++) {
@@ -594,21 +602,28 @@ export default function Terminal() {
                     } else if (snakeGame.food.x === x && snakeGame.food.y === y) {
                       row.push("★");
                     } else {
-                      row.push(" ");
+                      row.push("░");
                     }
                   }
                   grid.push(row);
                 }
-                return grid.map((row, y) => <div key={y} className="text-green-400">{row.join("")}</div>);
+                return grid.map((row, y) => <div key={y} className="text-green-400 tracking-wide">{row.join("")}</div>);
               })()}
             </div>
+            
+            {/* Game Over */}
             {snakeGame.gameOver && (
-              <div className="text-center mt-2">
-                <p className="text-red-400 font-bold">GAME OVER!</p>
-                <p className="text-zinc-400 text-sm">Type 'snake' to play again</p>
+              <div className="text-center mt-3 border-t border-red-500/30 pt-2">
+                <p className="text-red-400 font-bold text-lg blink">GAME OVER</p>
+                <p className="text-zinc-400 text-sm">Press 'snake' to play again</p>
               </div>
             )}
-            <p className="text-zinc-500 text-xs mt-2 text-center">Arrow keys to move • ESC to close</p>
+            
+            {/* Controls */}
+            <div className="mt-3 pt-2 border-t border-green-500/30 flex justify-between text-xs">
+              <span className="text-zinc-500">Controls:</span>
+              <span className="text-green-500">↑↓←→ move • ESC quit</span>
+            </div>
           </div>
         </div>
       )}

@@ -45,6 +45,16 @@ export default function Terminal() {
   const [idleTime, setIdleTime] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   
+  // Snake game state
+  const [snakeGame, setSnakeGame] = useState<{
+    active: boolean;
+    snake: { x: number; y: number }[];
+    direction: { x: number; y: number };
+    food: { x: number; y: number };
+    score: number;
+    gameOver: boolean;
+  } | null>(null);
+  
   const dvdColors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff", "#ff6600", "#6600ff"];
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -176,6 +186,126 @@ export default function Terminal() {
 
   const handleAudioEnded = () => {
     nextSong();
+  };
+
+  // Snake game logic
+  const startSnakeGame = () => {
+    setSnakeGame({
+      active: true,
+      snake: [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }],
+      direction: { x: 1, y: 0 },
+      food: { x: 15, y: 10 },
+      score: 0,
+      gameOver: false
+    });
+  };
+
+  // Snake game keyboard handler
+  useEffect(() => {
+    if (!snakeGame?.active || snakeGame.gameOver) return;
+    
+    const handleSnakeKey = (e: KeyboardEvent) => {
+      setSnakeGame(prev => {
+        if (!prev) return prev;
+        const key = e.key;
+        let newDir = prev.direction;
+        
+        if (key === "ArrowUp" && prev.direction.y !== 1) newDir = { x: 0, y: -1 };
+        else if (key === "ArrowDown" && prev.direction.y !== -1) newDir = { x: 0, y: 1 };
+        else if (key === "ArrowLeft" && prev.direction.x !== 1) newDir = { x: -1, y: 0 };
+        else if (key === "ArrowRight" && prev.direction.x !== -1) newDir = { x: 1, y: 0 };
+        
+        return { ...prev, direction: newDir };
+      });
+    };
+    
+    window.addEventListener("keydown", handleSnakeKey);
+    return () => window.removeEventListener("keydown", handleSnakeKey);
+  }, [snakeGame?.active, snakeGame?.gameOver]);
+
+  // Snake game loop
+  useEffect(() => {
+    if (!snakeGame?.active || snakeGame.gameOver) return;
+    
+    const interval = setInterval(() => {
+      setSnakeGame(prev => {
+        if (!prev || prev.gameOver) return prev;
+        
+        const newHead = {
+          x: prev.snake[0].x + prev.direction.x,
+          y: prev.snake[0].y + prev.direction.y
+        };
+        
+        // Wall collision
+        if (newHead.x < 0 || newHead.x >= 20 || newHead.y < 0 || newHead.y >= 15) {
+          return { ...prev, gameOver: true };
+        }
+        
+        // Self collision
+        if (prev.snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+          return { ...prev, gameOver: true };
+        }
+        
+        const newSnake = [newHead, ...prev.snake];
+        
+        // Food collision
+        if (newHead.x === prev.food.x && newHead.y === prev.food.y) {
+          // Generate new food
+          let newFood: { x: number; y: number };
+          do {
+            newFood = {
+              x: Math.floor(Math.random() * 20),
+              y: Math.floor(Math.random() * 15)
+            };
+          } while (newSnake.some(s => s.x === newFood.x && s.y === newFood.y));
+          
+          return { ...prev, snake: newSnake, food: newFood, score: prev.score + 10 };
+        }
+        
+        // Remove tail
+        newSnake.pop();
+        return { ...prev, snake: newSnake };
+      });
+    }, 150);
+    
+    return () => clearInterval(interval);
+  }, [snakeGame?.active, snakeGame?.gameOver]);
+
+  // Render snake game
+  const renderSnakeGame = () => {
+    if (!snakeGame) return null;
+    
+    const grid: string[][] = [];
+    for (let y = 0; y < 15; y++) {
+      const row: string[] = [];
+      for (let x = 0; x < 20; x++) {
+        if (x === 0 || x === 19 || y === 0 || y === 14) {
+          row.push("█");
+        } else if (snakeGame.snake[0].x === x && snakeGame.snake[0].y === y) {
+          row.push("●");
+        } else if (snakeGame.snake.some(s => s.x === x && s.y === y)) {
+          row.push("○");
+        } else if (snakeGame.food.x === x && snakeGame.food.y === y) {
+          row.push("★");
+        } else {
+          row.push(" ");
+        }
+      }
+      grid.push(row);
+    }
+    
+    return (
+      <div className="mt-1 mb-2">
+        <p className="text-zinc-300 mb-2">🐍 SNAKE - Score: {snakeGame.score}</p>
+        {snakeGame.gameOver && <p className="text-red-400 mb-2">GAME OVER! Type 'snake' to play again.</p>}
+        <div className="bg-zinc-900 p-2 rounded font-mono text-xs leading-tight">
+          {grid.map((row, y) => (
+            <div key={y}>{row.join("")}</div>
+          ))}
+        </div>
+        <p className="text-zinc-500 text-xs mt-2">Use arrow keys to move. Press ESC to exit.</p>
+      </div>
+    );
   };
 
   // Matrix Rain Effect - Full screen vertical rain
@@ -337,20 +467,8 @@ export default function Terminal() {
         }
         break;
       case "snake":
-        output = (
-          <div className="mt-1 mb-2">
-            <p className="text-zinc-300 mb-2">🐍 SNAKE GAME</p>
-            <div className="bg-zinc-900 p-3 rounded font-mono text-xs mb-2">
-              <p className="text-green-400">┌──────────────────────┐</p>
-              <p className="text-green-400">│▓▓▓░░░░░░░░░░░░░░░░░░│</p>
-              <p className="text-green-400">│░░░░░░░░░░░░░░▓▓▓░░░░░│</p>
-              <p className="text-green-400">│░░░░░░░░░░░░░░░░░▓▓▓░░│</p>
-              <p className="text-green-400">│░░░░░░░░░░░░░░░░░░░░░░│</p>
-              <p className="text-green-400">└──────────────────────┘</p>
-            </div>
-            <p className="text-zinc-400 text-sm">Score: 15 | Use arrow keys! (Coming soon)</p>
-          </div>
-        );
+        startSnakeGame();
+        output = <div className="mt-1 mb-2 text-zinc-400">Loading snake game...</div>;
         break;
       case "dvd":
         setShowDvd(true);
@@ -452,6 +570,48 @@ export default function Terminal() {
         <input ref={inputRef} type="text" value={input} onChange={e => { setInput(e.target.value); setIdleTime(0); setShowDvd(false); }} onKeyDown={handleKeyDown} className="flex-1 bg-transparent border-none outline-none text-zinc-200" autoFocus spellCheck={false} autoComplete="off" />
       </div>
       <div ref={bottomRef} className="h-4" />
+      
+      {/* Snake Game Overlay */}
+      {snakeGame?.active && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-green-400 font-bold">🐍 SNAKE</span>
+              <span className="text-zinc-300">Score: {snakeGame.score}</span>
+            </div>
+            <div className="bg-black p-2 rounded font-mono text-xs leading-tight">
+              {(() => {
+                const grid: string[][] = [];
+                for (let y = 0; y < 15; y++) {
+                  const row: string[] = [];
+                  for (let x = 0; x < 20; x++) {
+                    if (x === 0 || x === 19 || y === 0 || y === 14) {
+                      row.push("█");
+                    } else if (snakeGame.snake[0].x === x && snakeGame.snake[0].y === y) {
+                      row.push("●");
+                    } else if (snakeGame.snake.some(s => s.x === x && s.y === y)) {
+                      row.push("○");
+                    } else if (snakeGame.food.x === x && snakeGame.food.y === y) {
+                      row.push("★");
+                    } else {
+                      row.push(" ");
+                    }
+                  }
+                  grid.push(row);
+                }
+                return grid.map((row, y) => <div key={y} className="text-green-400">{row.join("")}</div>);
+              })()}
+            </div>
+            {snakeGame.gameOver && (
+              <div className="text-center mt-2">
+                <p className="text-red-400 font-bold">GAME OVER!</p>
+                <p className="text-zinc-400 text-sm">Type 'snake' to play again</p>
+              </div>
+            )}
+            <p className="text-zinc-500 text-xs mt-2 text-center">Arrow keys to move • ESC to close</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

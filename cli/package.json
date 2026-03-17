@@ -1,16 +1,17 @@
 {
-  "name": "ssh-portfolio",
+  "name": "cli-portfolio",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Interactive TUI Portfolio",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "ssh2": "^1.17.0"
+    "blessed": "^0.1.81",
+    "chalk": "^4.1.2"
   },
-  "description": ""
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

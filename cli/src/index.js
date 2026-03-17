@@ -45,13 +45,13 @@ const CONTENT = {
       'workflows, scale systems, and solve modern',
       'business challenges. His core services include:',
       '',
-      '✧ AI-driven system optimization',
-      '✧ Workflow automation & scaling',
-      '✧ Operational bottleneck resolution',
+      '+ AI-driven system optimization',
+      '+ Workflow automation & scaling',
+      '+ Operational bottleneck resolution',
       '',
       'He also loves traveling, visiting new countries,',
       'and meeting people across the globe.',
-      '(if you want to sponsor this, let him know 😉)'
+      '(if you want to sponsor this, let him know wink)'
     ]
   },
   links: {
@@ -72,27 +72,29 @@ const CONTENT = {
       'GitHub:  github.com/iamdhrv',
       '',
       'Always happy to chat about:',
-      '  • Automation & scripting',
-      '  • AI/ML projects',
-      '  • Building tools',
-      '  • Collaboration opportunities',
+      '  - Automation & scripting',
+      '  - AI/ML projects',
+      '  - Building tools',
+      '  - Collaboration opportunities',
       '',
       'Drop me a message!'
     ]
   }
 };
 
-// ASCII Art Header (DHRUV)
+// Simple ASCII Header
 const ASCII_HEADER = `
-  ██████╗██████╗ ██╗   ██╗██████╗ ████████╗
- ██╔════╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝
- ██║     ██████╔╝ ╚████╔╝ ██████╔╝   ██║
- ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║
- ╚██████╗██║  ██║   ██║   ██║        ██║
-  ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝
+  D H R U V
+   _____ 
+  /     \\
+ | () () |
+  \\_____/
+ 
+  Portfolio
+  v1.0.0
 `;
 
-// ============== LOADING SCREEN (Minimal) ==============
+// ============== LOADING SCREEN (Simple) ==============
 class LoadingScreen {
   constructor(screen, callback) {
     this.screen = screen;
@@ -109,11 +111,10 @@ class LoadingScreen {
       style: { bg: theme.bg, fg: theme.fg }
     });
 
-    // Simple loading text
+    // Loading text
     this.status = blessed.box({
-      top: 'center',
+      top: '45%',
       left: 'center',
-      width: '80%',
       content: '{cyan}Loading...{white}',
       style: { fg: theme.fg, bold: true },
       align: 'center'
@@ -121,10 +122,9 @@ class LoadingScreen {
 
     // Simple progress bar
     this.progressBar = blessed.box({
-      top: 'center',
+      top: '50%',
       left: 'center',
-      width: 25,
-      height: 3,
+      content: '[                        ] 0%',
       style: { fg: theme.highlight }
     });
 
@@ -138,16 +138,13 @@ class LoadingScreen {
     this.createUI();
     
     // Simple progress animation
-    const chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-    
     for (let i = 0; i <= 100; i += 5) {
-      const char = chars[Math.floor(i / 5) % chars.length];
-      const barLen = Math.floor(i / 5);
-      const bar = '█'.repeat(barLen) + '░'.repeat(20 - barLen);
-      this.progressBar.setContent(`[${bar}] ${i}%`);
-      this.status.setContent(`{cyan}Loading ${char}{white} ${i}%`);
+      const barLen = Math.floor(i / 4);
+      const bar = '#'.repeat(barLen) + '-'.repeat(25 - barLen);
+      this.progressBar.setContent('[' + bar + '] ' + i + '%');
+      this.status.setContent('{cyan}Loading...{white} ' + i + '%');
       this.screen.render();
-      await this.sleep(30);
+      await this.sleep(40);
     }
     
     this.status.setContent('{green}Ready!{white}');
@@ -175,8 +172,7 @@ class PortfolioApp {
   initLoading() {
     this.screen = blessed.screen({
       smartCSR: true,
-      title: `${CONFIG.name}'s Portfolio`,
-      fullUnicode: true
+      title: CONFIG.name + "'s Portfolio"
     });
 
     new LoadingScreen(this.screen, () => {
@@ -203,16 +199,16 @@ class PortfolioApp {
     // Header
     this.header = blessed.box({
       width: '100%',
-      height: 10,
-      content: chalk.cyan(ASCII_HEADER),
+      height: 12,
+      content: ASCII_HEADER,
       style: { fg: theme.highlight, bold: true }
     });
 
     // Menu
     this.menu = blessed.list({
       width: '25%',
-      height: '60%',
-      top: 11,
+      height: '55%',
+      top: 13,
       left: 0,
       keys: true,
       vi: true,
@@ -228,8 +224,8 @@ class PortfolioApp {
     // Content
     this.content = blessed.box({
       width: '73%',
-      height: '60%',
-      top: 11,
+      height: '55%',
+      top: 13,
       left: '26%',
       scrollable: true,
       keys: true,
@@ -245,8 +241,8 @@ class PortfolioApp {
     this.footer = blessed.box({
       width: '100%',
       height: 3,
-      top: '72%',
-      content: '  Navigate: ↑↓  |  Theme: t  |  Quit: q',
+      top: '70%',
+      content: '  Navigate: up/down  |  Theme: t  |  Quit: q',
       style: { fg: theme.dim }
     });
 
@@ -255,7 +251,7 @@ class PortfolioApp {
       width: '100%',
       height: 1,
       top: '99%',
-      content: `  v${CONFIG.version} | ${CONFIG.name}'s Portfolio`,
+      content: '  v' + CONFIG.version + ' | ' + CONFIG.name + "'s Portfolio",
       style: { fg: theme.dim }
     });
 
@@ -324,8 +320,8 @@ class PortfolioApp {
     const theme = CONFIG.themes[this.currentTheme];
     const section = CONTENT[this.currentSection];
     
-    let content = `{${theme.highlight}}{bold}${section.title}{/bold}{/${theme.highlight}}\n`;
-    content += `${theme.border}${'─'.repeat(30)}{\n\n`;
+    let content = '{bold}{' + theme.highlight + '}' + section.title + '{/' + theme.highlight + '}{/bold}\n';
+    content += theme.border + '----------------------------------------\n\n';
     
     if (animate) {
       this.content.setContent(content);
@@ -343,15 +339,15 @@ class PortfolioApp {
           newContent += typed + '\n';
           this.content.setContent(newContent);
           this.screen.render();
-          await this.sleep(10 + Math.random() * 10);
+          await this.sleep(8 + Math.random() * 8);
         }
       }
     }
     
-    content = `{${theme.highlight}}{bold}${section.title}{/bold}{/${theme.highlight}}\n`;
-    content += `${theme.border}${'─'.repeat(30)}{\n\n`;
+    content = '{bold}{' + theme.highlight + '}' + section.title + '{/' + theme.highlight + '}{/bold}\n';
+    content += theme.border + '----------------------------------------\n\n';
     section.lines.forEach(line => {
-      content += `${line}\n`;
+      content += line + '\n';
     });
     this.content.setContent(content);
     this.screen.render();

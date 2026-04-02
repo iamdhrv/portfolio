@@ -2,6 +2,7 @@
 
 const blessed = require('blessed');
 const chalk = require('chalk');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -11,25 +12,34 @@ const CONFIG = {
   version: '1.0.0',
   themes: {
     default: {
-      bg: 'black',
+      bg: 'default',
       fg: 'white',
-      border: 'cyan',
-      highlight: 'cyan',
-      dim: 'gray'
+      tagFg: 'white',
+      border: '#64d9f5',
+      highlight: '#64d9f5',
+      tagHighlight: 'cyan',
+      dim: 'gray',
+      tagDim: 'gray'
     },
     matrix: {
-      bg: 'black',
-      fg: 'green',
-      border: 'green',
-      highlight: 'green',
-      dim: 'darkgreen'
+      bg: '#020503',
+      fg: '#9af8c1',
+      tagFg: 'green',
+      border: '#67f08c',
+      highlight: '#67f08c',
+      tagHighlight: 'green',
+      dim: 'gray',
+      tagDim: 'gray'
     },
     ocean: {
-      bg: 'blue',
-      fg: 'white',
-      border: 'cyan',
-      highlight: 'cyan',
-      dim: 'blue'
+      bg: '#0e3a63',
+      fg: '#eef6ff',
+      tagFg: 'white',
+      border: '#6de2ff',
+      highlight: '#6de2ff',
+      tagHighlight: 'cyan',
+      dim: 'gray',
+      tagDim: 'gray'
     }
   }
 };
@@ -53,33 +63,36 @@ const CONTENT = {
       '',
       'He also loves traveling, visiting new countries,',
       'and meeting people across the globe.',
-      '(if you want to sponsor this, let him know wink)'
+      '(if you want to sponsor this, let him know 😉)'
     ]
   },
   links: {
     title: 'Links',
     lines: [
-      'GitHub:     https://github.com/iamdhrv',
-      'LinkedIn:   https://www.linkedin.com/in/dhruv-maniya/',
-      'X/Twitter:  https://x.com/iamdhrv',
-      'Instagram:  https://www.instagram.com/iamdhrv',
+      'Pick a profile below to open it in your browser or copy it.',
       '',
-      'Feel free to connect!'
+      'Use Enter to open and c to copy the selected item.'
+    ],
+    actions: [
+      { label: 'GitHub', value: 'https://github.com/iamdhrv', type: 'url' },
+      { label: 'LinkedIn', value: 'https://www.linkedin.com/in/dhruv-maniya/', type: 'url' },
+      { label: 'X / Twitter', value: 'https://x.com/iamdhrv', type: 'url' },
+      { label: 'Instagram', value: 'https://www.instagram.com/iamdhrv', type: 'url' }
     ]
   },
   contact: {
     title: 'Contact',
     lines: [
-      'Email:    iamdhrv@gmail.com',
-      'GitHub:  github.com/iamdhrv',
-      '',
       'Always happy to chat about:',
       '  - Automation & scripting',
       '  - AI/ML projects',
       '  - Building tools',
       '  - Collaboration opportunities',
       '',
-      'Drop me a message!'
+      'Use Enter to draft an email or c to copy the address.'
+    ],
+    actions: [
+      { label: 'Email', value: 'iamdhrv@gmail.com', type: 'email' }
     ]
   }
 };
@@ -181,6 +194,70 @@ function loadAsciiArt() {
 
 const ASCII_ART = loadAsciiArt();
 
+function runCommand(command, args = [], input) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: ['pipe', 'ignore', 'ignore'] });
+
+    child.on('error', reject);
+
+    if (typeof input === 'string') {
+      child.stdin.end(input);
+    } else {
+      child.stdin.end();
+    }
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(command + ' exited with code ' + code));
+      }
+    });
+  });
+}
+
+async function openExternal(target) {
+  const commands = process.platform === 'darwin'
+    ? [['open', [target]]]
+    : process.platform === 'win32'
+      ? [['cmd', ['/c', 'start', '', target]]]
+      : [['xdg-open', [target]]];
+
+  for (const [command, args] of commands) {
+    try {
+      await runCommand(command, args);
+      return;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  throw new Error('Unable to open external target');
+}
+
+async function copyToClipboard(value) {
+  const commands = process.platform === 'darwin'
+    ? [['pbcopy', []]]
+    : process.platform === 'win32'
+      ? [['clip', []]]
+      : [
+          ['wl-copy', []],
+          ['xclip', ['-selection', 'clipboard']],
+          ['xsel', ['--clipboard', '--input']]
+        ];
+
+  for (const [command, args] of commands) {
+    try {
+      await runCommand(command, args, value);
+      return;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  throw new Error('Unable to copy to clipboard');
+}
+
 // ============== LOADING SCREEN (Simple) ==============
 class LoadingScreen {
   constructor(screen, callback) {
@@ -201,33 +278,27 @@ class LoadingScreen {
     this.loadingBox = blessed.box({
       top: 'center',
       left: 'center',
-      width: 36,
-      height: 7,
-      border: {
-        type: 'line'
-      },
+      width: 42,
+      height: 5,
       style: {
         bg: theme.bg,
-        fg: theme.fg,
-        border: { fg: theme.border }
+        fg: theme.fg
       }
     });
 
-    // Loading text
     this.status = blessed.box({
-      top: 1,
+      top: 0,
       left: 0,
-      width: '100%-2',
+      width: '100%',
       content: 'Loading...',
       style: { fg: theme.fg, bold: true },
       align: 'center'
     });
 
-    // Simple progress bar
     this.progressBar = blessed.box({
-      top: 3,
+      top: 2,
       left: 0,
-      width: '100%-2',
+      width: '100%',
       content: '[                        ] 0%',
       style: { fg: theme.highlight },
       align: 'center'
@@ -271,6 +342,13 @@ class PortfolioApp {
     this.currentTheme = 'default';
     this.currentSection = 'about';
     this.sections = ['about', 'links', 'contact'];
+    this.sectionIndex = 0;
+    this.sectionActionIndex = {
+      links: 0,
+      contact: 0
+    };
+    this.statusMessage = '';
+    this.statusTimeout = null;
     
     this.initLoading();
   }
@@ -291,11 +369,17 @@ class PortfolioApp {
     this.createUI();
     this.setupKeys();
     this.render();
-    this.menu.focus();
   }
 
   createUI() {
     const theme = CONFIG.themes[this.currentTheme];
+    const isCompact = this.screen.width < 78 || this.screen.height < 24;
+    const leftWidth = isCompact ? '100%-4' : '48%';
+    const rightWidth = isCompact ? '100%-4' : '46%';
+    const rightLeft = isCompact ? 2 : '52%';
+    const artHeight = isCompact
+      ? Math.min(ASCII_ART.mainLineCount, Math.max(this.screen.height - 12, 10))
+      : Math.min(ASCII_ART.mainLineCount, Math.max(this.screen.height - 8, 16));
 
     this.container = blessed.box({
       width: '100%',
@@ -303,92 +387,166 @@ class PortfolioApp {
       style: { bg: theme.bg, fg: theme.fg }
     });
 
-    // Header
     this.header = blessed.box({
-      width: '42%',
-      height: ASCII_ART.mainLineCount,
+      width: leftWidth,
+      height: artHeight,
       top: 1,
-      left: 0,
+      left: 2,
       content: ASCII_ART.mainContent,
-      tags: false
-    });
-
-    // Menu
-    this.menu = blessed.list({
-      width: '42%',
-      top: ASCII_ART.mainLineCount + 2,
-      bottom: 4,
-      left: 0,
-      keys: true,
-      vi: true,
-      mouse: true,
+      tags: false,
       style: {
-        selected: { bg: theme.highlight, fg: theme.bg, bold: true },
-        item: { fg: theme.fg },
-        border: { fg: theme.border }
-      },
-      items: this.sections.map(s => '  ' + s.charAt(0).toUpperCase() + s.slice(1))
+        bg: theme.bg,
+        fg: theme.fg
+      }
     });
 
-    // Content
+    this.title = blessed.box({
+      width: rightWidth,
+      height: 3,
+      top: isCompact ? artHeight + 2 : 2,
+      left: rightLeft,
+      align: 'left',
+      tags: true,
+      style: {
+        bg: theme.bg,
+        fg: theme.fg
+      }
+    });
+
     this.content = blessed.box({
-      width: '56%',
-      top: 1,
-      bottom: 4,
-      left: '44%',
+      width: rightWidth,
+      top: isCompact ? artHeight + 6 : 6,
+      bottom: 5,
+      left: rightLeft,
       scrollable: true,
       keys: true,
       vi: true,
+      mouse: true,
+      alwaysScroll: true,
+      wrap: true,
       style: {
-        border: { fg: theme.border },
+        bg: theme.bg,
         fg: theme.fg
       },
-      tags: true
+      tags: true,
+      padding: {
+        left: 0,
+        right: 1
+      }
+    });
+    this.contentBaseTop = isCompact ? artHeight + 6 : 6;
+
+    this.actionList = blessed.list({
+      width: rightWidth,
+      height: 6,
+      bottom: 5,
+      left: rightLeft,
+      keys: false,
+      mouse: true,
+      tags: true,
+      hidden: true,
+      style: {
+        bg: theme.bg,
+        fg: theme.fg,
+        selected: {
+          bg: theme.highlight,
+          fg: 'black',
+          bold: true
+        },
+        item: {
+          bg: theme.bg,
+          fg: theme.fg
+        }
+      },
+      padding: {
+        left: 0,
+        right: 1
+      }
     });
 
-    // Footer
+    this.nav = blessed.box({
+      width: rightWidth,
+      height: 1,
+      bottom: 3,
+      left: rightLeft,
+      tags: true,
+      style: {
+        bg: theme.bg,
+        fg: theme.fg
+      }
+    });
+
     this.footer = blessed.box({
-      width: '100%',
-      height: 3,
+      width: '100%-4',
+      height: 1,
       bottom: 1,
-      content: '  Navigate: up/down  |  Theme: t  |  Quit: q',
-      style: { fg: theme.dim }
+      left: 2,
+      align: 'center',
+      tags: true,
+      style: {
+        bg: theme.bg,
+        fg: theme.dim
+      }
     });
 
-    // Version
     this.version = blessed.box({
-      width: '100%',
+      width: '100%-4',
       height: 1,
       bottom: 0,
-      content: '  v' + CONFIG.version + ' | ' + CONFIG.name + "'s Portfolio",
-      style: { fg: theme.dim }
+      left: 2,
+      align: 'right',
+      style: {
+        bg: theme.bg,
+        fg: theme.dim
+      }
     });
 
     this.container.append(this.header);
-    this.container.append(this.menu);
+    this.container.append(this.title);
     this.container.append(this.content);
+    this.container.append(this.actionList);
+    this.container.append(this.nav);
     this.container.append(this.footer);
     this.container.append(this.version);
     this.screen.append(this.container);
   }
 
   setupKeys() {
-    this.menu.on('select', async (item, index) => {
-      this.currentSection = this.sections[index];
-      await this.renderContent(true);
+    this.screen.key(['left', 'h'], () => {
+      this.moveSection(-1);
     });
 
-    this.menu.on('keypress', async (ch, key) => {
-      if (key.name === 'up' || key.name === 'k') {
-        const idx = this.sections.indexOf(this.currentSection);
-        this.currentSection = this.sections[(idx - 1 + this.sections.length) % this.sections.length];
-        this.menu.select(this.sections.indexOf(this.currentSection));
-        await this.renderContent(true);
-      } else if (key.name === 'down' || key.name === 'j') {
-        const idx = this.sections.indexOf(this.currentSection);
-        this.currentSection = this.sections[(idx + 1) % this.sections.length];
-        this.menu.select(this.sections.indexOf(this.currentSection));
-        await this.renderContent(true);
+    this.screen.key(['right', 'l'], () => {
+      this.moveSection(1);
+    });
+
+    this.screen.key(['up', 'k'], () => {
+      if (this.hasActions()) {
+        this.moveAction(-1);
+        return;
+      }
+
+      this.moveSection(-1);
+    });
+
+    this.screen.key(['down', 'j'], () => {
+      if (this.hasActions()) {
+        this.moveAction(1);
+        return;
+      }
+
+      this.moveSection(1);
+    });
+
+    this.screen.key(['enter'], () => {
+      if (this.hasActions()) {
+        this.openCurrentAction();
+      }
+    });
+
+    this.screen.key(['c', 'C', 'y'], () => {
+      if (this.hasActions()) {
+        this.copyCurrentAction();
       }
     });
 
@@ -396,8 +554,24 @@ class PortfolioApp {
       this.toggleTheme();
     });
 
+    this.screen.on('keypress', (ch) => {
+      if (ch === '1') {
+        this.selectSection(0);
+      } else if (ch === '2') {
+        this.selectSection(1);
+      } else if (ch === '3') {
+        this.selectSection(2);
+      }
+    });
+
     this.screen.key(['q', 'Q', 'escape'], () => {
       process.exit(0);
+    });
+
+    this.screen.on('resize', () => {
+      this.screen.remove(this.container);
+      this.createUI();
+      this.render();
     });
   }
 
@@ -414,56 +588,210 @@ class PortfolioApp {
     
     this.container.style.bg = theme.bg;
     this.container.style.fg = theme.fg;
-    this.menu.style.selected.bg = theme.highlight;
-    this.menu.style.selected.fg = theme.bg;
-    this.menu.style.item.fg = theme.fg;
-    this.menu.style.border.fg = theme.border;
-    this.content.style.border.fg = theme.border;
+    this.header.style.bg = theme.bg;
+    this.title.style.bg = theme.bg;
+    this.title.style.fg = theme.highlight;
+    this.content.style.bg = theme.bg;
     this.content.style.fg = theme.fg;
+    this.actionList.style.bg = theme.bg;
+    this.actionList.style.fg = theme.fg;
+    this.actionList.style.item.bg = theme.bg;
+    this.actionList.style.item.fg = theme.fg;
+    this.actionList.style.selected.bg = theme.highlight;
+    this.actionList.style.selected.fg = 'black';
+    this.nav.style.bg = theme.bg;
+    this.footer.style.bg = theme.bg;
+    this.footer.style.fg = theme.dim;
+    this.version.style.bg = theme.bg;
+    this.version.style.fg = theme.dim;
+    this.title.setContent(this.getTitleContent(theme));
+    this.nav.setContent(this.getNavContent(theme));
+    this.footer.setContent(this.getFooterContent(theme));
+    this.version.setContent(CONFIG.name + "'s Portfolio  ·  v" + CONFIG.version);
 
-    this.renderContent(false);
+    this.renderContent();
     this.screen.render();
   }
 
-  async renderContent(animate = true) {
+  getTitleContent(theme) {
+    return '{' + theme.tagHighlight + '-fg}dhruv{/' + theme.tagHighlight + '-fg}\n'
+      + '{' + theme.tagDim + '-fg}system architect • automation engineer{/' + theme.tagDim + '-fg}';
+  }
+
+  getNavContent(theme) {
+    return this.sections
+      .map((section, index) => {
+        const label = section.charAt(0).toUpperCase() + section.slice(1);
+        if (index === this.sectionIndex) {
+          return '{' + theme.tagHighlight + '-fg}✦ ' + label + '{/' + theme.tagHighlight + '-fg}';
+        }
+
+        return '{' + theme.tagFg + '-fg}' + label + '{/' + theme.tagFg + '-fg}';
+      })
+      .join('    ');
+  }
+
+  getFooterContent(theme) {
+    if (this.statusMessage) {
+      return '{' + theme.tagHighlight + '-fg}' + this.statusMessage + '{/' + theme.tagHighlight + '-fg}';
+    }
+
+    if (this.hasActions()) {
+      return '↑/↓ choose  ·  Enter open  ·  c copy  ·  ←/→ sections  ·  t theme';
+    }
+
+    return '←/→ sections  ·  1-3 jump  ·  t theme  ·  q quit';
+  }
+
+  formatSectionLines(section, theme) {
+    return section.lines.map((line) => {
+      if (!line.trim()) {
+        return '';
+      }
+
+      if (line.startsWith('+ ')) {
+        return '{' + theme.tagHighlight + '-fg}•{/' + theme.tagHighlight + '-fg} ' + line.slice(2);
+      }
+
+      if (line.startsWith('  - ')) {
+        return '{' + theme.tagHighlight + '-fg}•{/' + theme.tagHighlight + '-fg} ' + line.trim().slice(2);
+      }
+
+      if (line.includes(':') && this.currentSection !== 'about') {
+        const [label, ...rest] = line.split(':');
+        return '{' + theme.tagHighlight + '-fg}' + label + ':{/' + theme.tagHighlight + '-fg}' + rest.join(':');
+      }
+
+      if (line.startsWith('(') && line.endsWith(')')) {
+        return '{' + theme.tagDim + '-fg}' + line + '{/' + theme.tagDim + '-fg}';
+      }
+
+      return line;
+    });
+  }
+
+  renderContent() {
     const theme = CONFIG.themes[this.currentTheme];
     const section = CONTENT[this.currentSection];
-    
-    let content = '{bold}{' + theme.highlight + '}' + section.title + '{/' + theme.highlight + '}{/bold}\n';
-    content += theme.border + '----------------------------------------\n\n';
-    
-    if (animate) {
-      this.content.setContent(content);
-      this.screen.render();
-      await this.sleep(100);
-      
-      for (const line of section.lines) {
-        for (let i = 0; i <= line.length; i++) {
-          const typed = line.substring(0, i);
-          const lineIdx = section.lines.indexOf(line);
-          let newContent = content;
-          for (let j = 0; j < lineIdx; j++) {
-            newContent += section.lines[j] + '\n';
-          }
-          newContent += typed + '\n';
-          this.content.setContent(newContent);
-          this.screen.render();
-          await this.sleep(8 + Math.random() * 8);
-        }
-      }
-    }
-    
-    content = '{bold}{' + theme.highlight + '}' + section.title + '{/' + theme.highlight + '}{/bold}\n';
-    content += theme.border + '----------------------------------------\n\n';
-    section.lines.forEach(line => {
-      content += line + '\n';
-    });
+    const lines = this.formatSectionLines(section, theme);
+    const actions = this.getCurrentActions();
+    let content = '{bold}{' + theme.tagHighlight + '-fg}' + section.title + '{/' + theme.tagHighlight + '-fg}{/bold}\n';
+    content += '{' + theme.tagDim + '-fg}────────────────────────────────{/' + theme.tagDim + '-fg}\n\n';
+    content += lines.join('\n');
+    this.content.top = this.contentBaseTop;
+    this.content.bottom = actions.length > 0 ? Math.min(actions.length + 1, 8) + 6 : 5;
+    this.content.setScroll(0);
     this.content.setContent(content);
+
+    if (actions.length > 0) {
+      this.actionList.height = Math.min(actions.length + 1, 8);
+      this.actionList.bottom = 5;
+      this.actionList.show();
+      this.actionList.setItems(actions.map((action) => this.formatActionItem(action, theme)));
+      this.actionList.select(this.sectionActionIndex[this.currentSection] || 0);
+
+      this.actionList.children.forEach((child, index) => {
+        child.on('click', () => {
+          this.sectionActionIndex[this.currentSection] = index;
+          this.actionList.select(index);
+          this.openCurrentAction();
+        });
+      });
+    } else {
+      this.actionList.hide();
+    }
+  }
+
+  formatActionItem(action, theme) {
+    return '{' + theme.tagHighlight + '-fg}' + action.label + '{/' + theme.tagHighlight + '-fg}'
+      + '  '
+      + '{' + theme.tagDim + '-fg}' + action.value + '{/' + theme.tagDim + '-fg}';
+  }
+
+  getCurrentActions() {
+    return CONTENT[this.currentSection].actions || [];
+  }
+
+  hasActions() {
+    return this.getCurrentActions().length > 0;
+  }
+
+  moveAction(direction) {
+    const actions = this.getCurrentActions();
+    if (actions.length === 0) {
+      return;
+    }
+
+    const currentIndex = this.sectionActionIndex[this.currentSection] || 0;
+    const nextIndex = (currentIndex + direction + actions.length) % actions.length;
+    this.sectionActionIndex[this.currentSection] = nextIndex;
+    this.actionList.select(nextIndex);
     this.screen.render();
   }
 
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  getSelectedAction() {
+    const actions = this.getCurrentActions();
+    if (actions.length === 0) {
+      return null;
+    }
+
+    const index = this.sectionActionIndex[this.currentSection] || 0;
+    return actions[index] || null;
+  }
+
+  async openCurrentAction() {
+    const action = this.getSelectedAction();
+    if (!action) {
+      return;
+    }
+
+    const target = action.type === 'email' ? 'mailto:' + action.value : action.value;
+    try {
+      await openExternal(target);
+      this.flashStatus('Opened ' + action.label);
+    } catch (error) {
+      this.flashStatus('Could not open ' + action.label);
+    }
+  }
+
+  async copyCurrentAction() {
+    const action = this.getSelectedAction();
+    if (!action) {
+      return;
+    }
+
+    try {
+      await copyToClipboard(action.value);
+      this.flashStatus('Copied ' + action.label);
+    } catch (error) {
+      this.flashStatus('Could not copy ' + action.label);
+    }
+  }
+
+  flashStatus(message) {
+    this.statusMessage = message;
+    if (this.statusTimeout) {
+      clearTimeout(this.statusTimeout);
+    }
+
+    this.render();
+
+    this.statusTimeout = setTimeout(() => {
+      this.statusMessage = '';
+      this.statusTimeout = null;
+      this.render();
+    }, 1800);
+  }
+
+  moveSection(direction) {
+    const nextIndex = (this.sectionIndex + direction + this.sections.length) % this.sections.length;
+    this.selectSection(nextIndex);
+  }
+
+  selectSection(index) {
+    this.sectionIndex = index;
+    this.currentSection = this.sections[index];
+    this.render();
   }
 }
 

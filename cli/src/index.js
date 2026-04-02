@@ -2,6 +2,8 @@
 
 const blessed = require('blessed');
 const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
 
 // ============== CONFIG ==============
 const CONFIG = {
@@ -94,6 +96,91 @@ const ASCII_HEADER = `
   v1.0.0
 `;
 
+const ASCII_SPLASH_COLORS = [
+  '#7ce8b2',
+  '#8fe3b8',
+  '#cfe08f',
+  '#f2cf85',
+  '#eca18f',
+  '#d97cb8',
+  '#a588ff',
+  '#7db6ff'
+];
+
+function hexToRgb(hex) {
+  const value = hex.replace('#', '');
+
+  return {
+    r: Number.parseInt(value.slice(0, 2), 16),
+    g: Number.parseInt(value.slice(2, 4), 16),
+    b: Number.parseInt(value.slice(4, 6), 16)
+  };
+}
+
+function rgbToHex({ r, g, b }) {
+  return '#' + [r, g, b]
+    .map((channel) => Math.max(0, Math.min(255, Math.round(channel))).toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function getGradientColor(index, totalLines, palette) {
+  if (totalLines <= 1 || palette.length === 1) {
+    return palette[0];
+  }
+
+  const scaledIndex = (index / (totalLines - 1)) * (palette.length - 1);
+  const startIndex = Math.floor(scaledIndex);
+  const endIndex = Math.min(startIndex + 1, palette.length - 1);
+  const mix = scaledIndex - startIndex;
+  const start = hexToRgb(palette[startIndex]);
+  const end = hexToRgb(palette[endIndex]);
+
+  return rgbToHex({
+    r: start.r + (end.r - start.r) * mix,
+    g: start.g + (end.g - start.g) * mix,
+    b: start.b + (end.b - start.b) * mix
+  });
+}
+
+function scaleAsciiLines(lines, xStep = 2, yStep = 2) {
+  return lines
+    .filter((_, index) => index % yStep === 0)
+    .map((line) => Array.from(line).filter((_, index) => index % xStep === 0).join('').trimEnd());
+}
+
+function colorizeAsciiLines(lines) {
+  return lines
+    .map((line, index) => chalk.hex(getGradientColor(index, lines.length, ASCII_SPLASH_COLORS))(line))
+    .join('\n');
+}
+
+function loadAsciiArt() {
+  try {
+    const artPath = path.resolve(__dirname, '../ascii-cli.txt');
+    const art = fs.readFileSync(artPath, 'utf8').replace(/\n$/, '');
+    const lines = art.split('\n');
+    const compactLines = scaleAsciiLines(lines, 2, 2);
+
+    return {
+      loadingContent: colorizeAsciiLines(compactLines),
+      loadingLineCount: compactLines.length,
+      mainContent: colorizeAsciiLines(compactLines),
+      mainLineCount: compactLines.length
+    };
+  } catch (error) {
+    const fallbackLines = ASCII_HEADER.trim().split('\n');
+
+    return {
+      loadingContent: chalk.cyan(ASCII_HEADER),
+      loadingLineCount: fallbackLines.length,
+      mainContent: chalk.cyan(ASCII_HEADER),
+      mainLineCount: fallbackLines.length
+    };
+  }
+}
+
+const ASCII_ART = loadAsciiArt();
+
 // ============== LOADING SCREEN (Simple) ==============
 class LoadingScreen {
   constructor(screen, callback) {
@@ -111,25 +198,44 @@ class LoadingScreen {
       style: { bg: theme.bg, fg: theme.fg }
     });
 
+    this.loadingBox = blessed.box({
+      top: 'center',
+      left: 'center',
+      width: 36,
+      height: 7,
+      border: {
+        type: 'line'
+      },
+      style: {
+        bg: theme.bg,
+        fg: theme.fg,
+        border: { fg: theme.border }
+      }
+    });
+
     // Loading text
     this.status = blessed.box({
-      top: '45%',
-      left: 'center',
-      content: '{cyan}Loading...{white}',
+      top: 1,
+      left: 0,
+      width: '100%-2',
+      content: 'Loading...',
       style: { fg: theme.fg, bold: true },
       align: 'center'
     });
 
     // Simple progress bar
     this.progressBar = blessed.box({
-      top: '50%',
-      left: 'center',
+      top: 3,
+      left: 0,
+      width: '100%-2',
       content: '[                        ] 0%',
-      style: { fg: theme.highlight }
+      style: { fg: theme.highlight },
+      align: 'center'
     });
 
-    this.container.append(this.status);
-    this.container.append(this.progressBar);
+    this.loadingBox.append(this.status);
+    this.loadingBox.append(this.progressBar);
+    this.container.append(this.loadingBox);
     this.screen.append(this.container);
     this.screen.render();
   }
@@ -142,12 +248,12 @@ class LoadingScreen {
       const barLen = Math.floor(i / 4);
       const bar = '#'.repeat(barLen) + '-'.repeat(25 - barLen);
       this.progressBar.setContent('[' + bar + '] ' + i + '%');
-      this.status.setContent('{cyan}Loading...{white} ' + i + '%');
+      this.status.setContent('Loading... ' + i + '%');
       this.screen.render();
       await this.sleep(40);
     }
     
-    this.status.setContent('{green}Ready!{white}');
+    this.status.setContent('Ready!');
     this.screen.render();
     await this.sleep(200);
     this.callback();
@@ -172,7 +278,8 @@ class PortfolioApp {
   initLoading() {
     this.screen = blessed.screen({
       smartCSR: true,
-      title: CONFIG.name + "'s Portfolio"
+      title: CONFIG.name + "'s Portfolio",
+      fullUnicode: true
     });
 
     new LoadingScreen(this.screen, () => {
@@ -198,17 +305,19 @@ class PortfolioApp {
 
     // Header
     this.header = blessed.box({
-      width: '100%',
-      height: 12,
-      content: ASCII_HEADER,
-      style: { fg: theme.highlight, bold: true }
+      width: '42%',
+      height: ASCII_ART.mainLineCount,
+      top: 1,
+      left: 0,
+      content: ASCII_ART.mainContent,
+      tags: false
     });
 
     // Menu
     this.menu = blessed.list({
-      width: '25%',
-      height: '55%',
-      top: 13,
+      width: '42%',
+      top: ASCII_ART.mainLineCount + 2,
+      bottom: 4,
       left: 0,
       keys: true,
       vi: true,
@@ -223,10 +332,10 @@ class PortfolioApp {
 
     // Content
     this.content = blessed.box({
-      width: '73%',
-      height: '55%',
-      top: 13,
-      left: '26%',
+      width: '56%',
+      top: 1,
+      bottom: 4,
+      left: '44%',
       scrollable: true,
       keys: true,
       vi: true,
@@ -241,7 +350,7 @@ class PortfolioApp {
     this.footer = blessed.box({
       width: '100%',
       height: 3,
-      top: '70%',
+      bottom: 1,
       content: '  Navigate: up/down  |  Theme: t  |  Quit: q',
       style: { fg: theme.dim }
     });
@@ -250,7 +359,7 @@ class PortfolioApp {
     this.version = blessed.box({
       width: '100%',
       height: 1,
-      top: '99%',
+      bottom: 0,
       content: '  v' + CONFIG.version + ' | ' + CONFIG.name + "'s Portfolio",
       style: { fg: theme.dim }
     });

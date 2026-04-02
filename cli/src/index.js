@@ -194,6 +194,70 @@ function loadAsciiArt() {
 
 const ASCII_ART = loadAsciiArt();
 
+function runCommand(command, args = [], input) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: ['pipe', 'ignore', 'ignore'] });
+
+    child.on('error', reject);
+
+    if (typeof input === 'string') {
+      child.stdin.end(input);
+    } else {
+      child.stdin.end();
+    }
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(command + ' exited with code ' + code));
+      }
+    });
+  });
+}
+
+async function openExternal(target) {
+  const commands = process.platform === 'darwin'
+    ? [['open', [target]]]
+    : process.platform === 'win32'
+      ? [['cmd', ['/c', 'start', '', target]]]
+      : [['xdg-open', [target]]];
+
+  for (const [command, args] of commands) {
+    try {
+      await runCommand(command, args);
+      return;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  throw new Error('Unable to open external target');
+}
+
+async function copyToClipboard(value) {
+  const commands = process.platform === 'darwin'
+    ? [['pbcopy', []]]
+    : process.platform === 'win32'
+      ? [['clip', []]]
+      : [
+          ['wl-copy', []],
+          ['xclip', ['-selection', 'clipboard']],
+          ['xsel', ['--clipboard', '--input']]
+        ];
+
+  for (const [command, args] of commands) {
+    try {
+      await runCommand(command, args, value);
+      return;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  throw new Error('Unable to copy to clipboard');
+}
+
 // ============== LOADING SCREEN (Simple) ==============
 class LoadingScreen {
   constructor(screen, callback) {
@@ -675,48 +739,33 @@ class PortfolioApp {
     return actions[index] || null;
   }
 
-  openCurrentAction() {
+  async openCurrentAction() {
     const action = this.getSelectedAction();
     if (!action) {
       return;
     }
 
     const target = action.type === 'email' ? 'mailto:' + action.value : action.value;
-    const opener = spawn('open', [target], {
-      stdio: 'ignore'
-    });
-
-    opener.on('error', () => {
+    try {
+      await openExternal(target);
+      this.flashStatus('Opened ' + action.label);
+    } catch (error) {
       this.flashStatus('Could not open ' + action.label);
-    });
-
-    opener.on('close', (code) => {
-      if (code === 0) {
-        this.flashStatus('Opened ' + action.label);
-      } else {
-        this.flashStatus('Could not open ' + action.label);
-      }
-    });
+    }
   }
 
-  copyCurrentAction() {
+  async copyCurrentAction() {
     const action = this.getSelectedAction();
     if (!action) {
       return;
     }
 
-    const copier = spawn('pbcopy');
-    copier.on('error', () => {
+    try {
+      await copyToClipboard(action.value);
+      this.flashStatus('Copied ' + action.label);
+    } catch (error) {
       this.flashStatus('Could not copy ' + action.label);
-    });
-    copier.stdin.end(action.value);
-    copier.on('close', (code) => {
-      if (code === 0) {
-        this.flashStatus('Copied ' + action.label);
-      } else {
-        this.flashStatus('Could not copy ' + action.label);
-      }
-    });
+    }
   }
 
   flashStatus(message) {
